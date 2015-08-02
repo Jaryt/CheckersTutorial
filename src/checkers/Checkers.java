@@ -21,7 +21,7 @@ public class Checkers implements ActionListener, MouseListener
 
 	private RenderPanel pane;
 
-	private int turn, boardSize = 8;
+	private int turn, boardSize = 10;
 
 	private static final int WIDTH = 806, HEIGHT = 833, HUDWIDTH = 200;
 
@@ -30,6 +30,8 @@ public class Checkers implements ActionListener, MouseListener
 	private ArrayList<Point> pos;
 
 	private int redRemaining, grayRemaining, moves, winningTeam = -1;
+
+	private boolean canSkipJump;
 
 	private Piece selected;
 
@@ -201,6 +203,21 @@ public class Checkers implements ActionListener, MouseListener
 			start();
 		}
 
+		if (canSkipJump && arg0.getX() > 55 && arg0.getX() < 155 && arg0.getY() > 100 && arg0.getY() < 205)
+		{
+			turn = (turn + 1) % 2;
+			canSkipJump = false;
+			selected = null;
+			pos.clear();
+
+			for (Piece piece : pieces)
+			{
+				piece.targeting = false;
+			}
+
+			calculatePossibleJumps(true);
+		}
+		
 		int x = (arg0.getX() - HUDWIDTH) / (WIDTH / boardSize);
 		int y = arg0.getY() / (HEIGHT / boardSize);
 
@@ -344,10 +361,16 @@ public class Checkers implements ActionListener, MouseListener
 
 						calculatePossibleJumps(false);
 
+						if (!pos.isEmpty())
+						{
+							canSkipJump = true;
+						}
+
 						if (y == (boardSize - 1) * ((turn + 1) % 2))
 						{
 							selected.crowned = true;
 							turn = (turn + 1) % 2;
+							canSkipJump = false;
 							selected = null;
 
 							return;
@@ -356,6 +379,7 @@ public class Checkers implements ActionListener, MouseListener
 						if (pos.isEmpty())
 						{
 							turn = (turn + 1) % 2;
+							canSkipJump = false;
 							selected = null;
 
 							calculatePossibleJumps(true);
@@ -393,10 +417,16 @@ public class Checkers implements ActionListener, MouseListener
 
 						calculatePossibleJumps(false);
 
+						if (!pos.isEmpty())
+						{
+							canSkipJump = true;
+						}
+
 						if (y == (boardSize - 1) * ((turn + 1) % 2))
 						{
 							selected.crowned = true;
 							turn = (turn + 1) % 2;
+							canSkipJump = false;
 							selected = null;
 
 							return;
@@ -405,6 +435,7 @@ public class Checkers implements ActionListener, MouseListener
 						if (pos.isEmpty())
 						{
 							turn = (turn + 1) % 2;
+							canSkipJump = false;
 							selected = null;
 
 							calculatePossibleJumps(true);
@@ -496,7 +527,7 @@ public class Checkers implements ActionListener, MouseListener
 				if (piece.x + dx >= 0 && piece.y + dy >= 0 && piece.x + dx < boardSize && piece.y + dy < boardSize && jumped == null)
 				{
 					pos.add(new Point(piece.x + dx, piece.y + dy));
-					piece.targeting = true;
+					selected.targeting = true;
 				}
 			}
 		}
